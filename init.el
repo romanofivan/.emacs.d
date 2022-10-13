@@ -1,4 +1,3 @@
-;; You will most likely need to adjust this font size for your system!
 (defvar runemacs/default-font-size 140)
 
 (setq inhibit-startup-message t)
@@ -28,7 +27,7 @@
 
 (setq package-archives '(("org" . "https://orgmode.org/elpa/")
                          ("elpa" . "https://elpa.gnu.org/packages/")
-			 ("melpa-stable" . "http://stable.melpa.org/packages/")))
+			 ("melpa" . "http://melpa.org/packages/")))
 
 (package-initialize)
 (unless package-archive-contents
@@ -42,6 +41,7 @@
 (setq use-package-always-ensure t)
 
 (global-display-line-numbers-mode t)
+(show-paren-mode 1)
 
 ;; Disable line numbers for some modes
 (dolist (mode '(org-mode-hook
@@ -68,12 +68,6 @@
   :config
   (ivy-mode 1))
 
-;; NOTE: The first time you load your configuration on a new machine, you'll
-;; need to run the following command interactively so that mode line icons
-;; display correctly:
-;;
-;; M-x all-the-icons-install-fonts
-
 (use-package all-the-icons)
 
 (use-package doom-modeline
@@ -92,9 +86,48 @@
   :config
   (setq which-key-idle-delay 1))
 
-(use-package ivy-rich
+;; flycheck syntax checker
+(use-package flycheck
+  :init (global-flycheck-mode))
+
+;; LSP
+(use-package lsp-mode
   :init
-  (ivy-rich-mode 1))
+  (setq lsp-keymap-prefix "C-c l")
+  :hook ((go-mode . lsp-deferred)
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands (lsp lsp-deferred))
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-doc-position 'bottom))
+
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+
+(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+
+;;Optional - provides snippet support.
+
+(use-package yasnippet
+  :commands yas-minor-mode
+  :hook (
+         (go-mode . yas-minor-mode)
+         ))
+
+(setq lsp-ui-doc-enable t
+      lsp-ui-peek-enable t
+      lsp-ui-sideline-enable t
+      lsp-ui-imenu-enable t
+      lsp-ui-flycheck-enable t)
+
+;; Company mode is a standard completion package that works well with lsp-mode.
+(use-package company
+  :ensure t
+  :config
+  ;; Optionally enable completion-as-you-type behavior.
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 1))
 
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
@@ -123,13 +156,19 @@
   :init (setq markdown-command "multimarkdown"))
 
 (use-package php-mode)
+
+(use-package go-mode
+  :hook ((go-mode . lsp-deferred)
+         (before-save . lsp-format-buffer)
+         (before-save . lsp-organize-imports)))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(markdown-mode treemacs php-mode magit helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline all-the-icons ivy command-log-mode use-package)))
+   '(company markdown-mode treemacs php-mode magit helpful counsel ivy-rich which-key rainbow-delimiters doom-themes doom-modeline all-the-icons ivy command-log-mode use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
