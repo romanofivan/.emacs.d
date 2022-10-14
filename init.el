@@ -95,6 +95,7 @@
   :init
   (setq lsp-keymap-prefix "C-c l")
   :hook ((go-mode . lsp-deferred)
+	 (php-mode . lsp-deferred)
          (lsp-mode . lsp-enable-which-key-integration))
   :commands (lsp lsp-deferred))
 
